@@ -1,11 +1,12 @@
 from pathlib import Path
-
+import struct
 
 class BinaryFile:
-    def __init__(self, filename, encode: int = 0):
+    def __init__(self, filename: Path, encode: int = 0):
         if not 0 <= encode <= 255:
             raise ValueError("encode must be a byte")
-        with open(filename, 'rb') as f:
+        fname = find_file_case_insensitive(filename)
+        with open(fname, 'rb') as f:
             self.data = bytes(b ^ encode for b in f.read())
         self.ptr = 0
 
@@ -29,6 +30,11 @@ class BinaryFile:
         hi = self.readByte()
         return lo + (hi << 8)
 
+    def read16LE_signed(self):
+        value = struct.unpack_from("<h", self.data, self.ptr)[0]
+        self.ptr += 2
+        return value
+
     def get(self, index: int):
         return self.data[index]
 
@@ -40,7 +46,9 @@ class BinaryFile:
 
 
 
-def find_file_case_insensitive(folder: Path, filename: str) -> Path:
+def find_file_case_insensitive(path: Path) -> Path:
+    folder = path.parent
+    filename = path.name
     filename_lower = filename.lower()
 
     matches = [

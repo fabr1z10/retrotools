@@ -19,3 +19,5 @@ EGA = [
     255,    255,    255     # 15 - white
 ] + [0] * (256-16) * 3
 
+EGA_RGBA = [(EGA[3*i], EGA[3*i+1], EGA[3*i+2], 255) for i in range(16)]
+
